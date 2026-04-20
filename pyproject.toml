@@ -1,7 +1,7 @@
 [project]
 name = "sc-foundation"
 version = "3.0.0"
-description = "Spello Consulting foundation package. Logging, config file handling, data file handling."
+description = "Spello Consulting foundation package. A Python library for log file management; config file management; CSV and JSON file operations and more."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

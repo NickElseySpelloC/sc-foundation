@@ -21,7 +21,6 @@ Or better yet, use UV:
 
     uv add sc-foundation
 
-
 ## Configuration File 
 The library uses a YAML file for configuration. An example config file (*config.yaml.example*) is [available on Github](https://github.com/NickElseySpelloC/sc-foundation). Copy this to *[your_app_name].yaml* before using the library. 
 
