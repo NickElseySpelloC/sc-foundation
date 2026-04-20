@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from sc_foundation import DateHelper, SCCommon
+from sc_foundation import sc_date_helper
 
 CONFIG_FILE = "tests/config.yaml"
 
@@ -252,6 +253,15 @@ def test_now_utc():
     """Test now() with UTC timezone."""
     time_now_utc = DateHelper.now_utc()
     assert time_now_utc.tzinfo == dt.UTC, "Timezone should be set to UTC"
+
+
+def test_get_dawn_dusk_times_auto_timezone(monkeypatch):
+    """Test automatic timezone lookup for dawn and dusk calculations."""
+    monkeypatch.setattr(sc_date_helper, "get_tz", lambda longitude, latitude: "Australia/Sydney")
+
+    result = DateHelper.get_dawn_dusk_times(-33.86, 151.21, timezone=None, as_at=dt.date(2026, 8, 1))
+
+    assert result["timezone"] == "Australia/Sydney", "Timezone should be resolved from coordinates"
 
 
 def test_today_add_days():

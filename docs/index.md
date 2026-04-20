@@ -15,11 +15,11 @@ The Spello Consulting Foundation library provides some foundational classes for:
 
 The library is available from PyPi, so to add it to your Python project use pip:
 
-    pip install sc-foundation
+    pip install sc-foundation-services
 
 Or better yet, use UV:
 
-    uv add sc-foundation
+    uv add sc-foundation-services
 
 ## Configuration File 
 The library uses a YAML file for configuration. An example config file (*config.yaml.example*) is [available on Github](https://github.com/NickElseySpelloC/sc-foundation). Copy this to *[your_app_name].yaml* before using the library. 

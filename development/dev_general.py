@@ -56,7 +56,7 @@ def test_get_dawn_dusk_times():
     # timezone = "Australia/Sydney"
     as_date = dt.datetime(2026, 8, 1).date()  # noqa: DTZ001
     return_data = DateHelper.get_dawn_dusk_times(latitude, longitude, timezone=None, as_at=as_date)
-    print(f"return_data: {return_data}")
+    print(f"\n\ntest_get_dawn_dusk_times() return_data: {return_data}")
 
 
 def main():

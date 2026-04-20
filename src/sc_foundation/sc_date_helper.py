@@ -8,7 +8,7 @@ from pathlib import Path
 import pytz
 from astral import LocationInfo
 from astral.sun import sun
-from timezonefinder import TimezoneFinder
+from tzfpy import get_tz
 
 from sc_foundation.sc_common import SCCommon
 
@@ -716,14 +716,8 @@ class DateHelper:  # noqa: PLR0904
         """
         name = "sc_foundation DateHelper"
         if timezone is None:
-            if not hasattr(DateHelper, "_timezone_finder"):
-                DateHelper._timezone_finder = TimezoneFinder()
-            tf = DateHelper._timezone_finder
-            tz_name = tf.timezone_at(lat=latitude, lng=longitude)
-            if tz_name is not None:
-                timezone = tz_name
-            else:
-                timezone = str(dt.datetime.now().astimezone().tzinfo)
+            tz_name = get_tz(longitude, latitude)
+            timezone = tz_name or str(dt.datetime.now().astimezone().tzinfo)
 
         if as_at is None:
             as_at = DateHelper.today(tzinfo=pytz.timezone(timezone))

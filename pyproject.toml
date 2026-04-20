@@ -1,6 +1,6 @@
 [project]
 name = "sc-foundation-services"
-version = "3.0.2"
+version = "3.0.3"
 description = "Spello Consulting foundation package. A Python library for log file management; config file management; CSV and JSON file operations and more."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -12,7 +12,7 @@ dependencies = [
     "python-dateutil>=2.9.0.post0",
     "pytz>=2026.1.post1",
     "pyyaml>=6.0.3",
-    "timezonefinder>=8.2.2",
+    "tzfpy>=1.2.0",
     "tzdata>=2026.1",
     "validators>=0.35.0",
 ]
@@ -37,7 +37,7 @@ docs = [
     "pdoc>=14.7.0",
 ]
 all = [
-    "sc-foundation[dev,docs]",
+    "sc-foundation-services[dev,docs]",
 ]
 
 [project.urls]
