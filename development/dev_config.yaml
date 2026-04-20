@@ -1,0 +1,24 @@
+# This is an example configuration file for the Spello Consulting Foundation library
+
+# Just an example section to show how to set up a section
+AmberAPI:
+  APIKey: ""
+  BaseUrl: https://api.amber.com.au/v1
+  Timeout: 16
+
+Files:
+  LogfileName: development/logs/test_logfile.log
+  LogfileMaxLines: 501
+  TimestampFormat: "%Y-%m-%d %H:%M:%S.%f"
+  LogProcessID: True
+  LogThreadID: True
+  LogfileVerbosity: all
+  ConsoleVerbosity: detailed
+
+# Enter your settings here if you want to be emailed when there's a critical error 
+Email:
+  EnableEmail: True
+  SendEmailsTo: nick@elseyworld.com
+  SMTPServer: smtp.gmail.com
+  SMTPPort: 587
+  SubjectPrefix: 

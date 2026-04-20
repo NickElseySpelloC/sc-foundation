@@ -1,0 +1,29 @@
+# This is an example configuration file for the Spello Consulting foundation library
+
+# Just an example section to show how to set up a section
+AmberAPI:
+  APIKey: This is not the real API key
+  BaseUrl: https://api.amber.com.au/v1
+  Timeout: 15
+
+
+Files:
+  # Name of the log file. Set to blak of None to disable logging
+  LogfileName: logfile.log
+  # How many lines of log file to keep. Set to 0 to disable log file truncation. Defaults to 10,000 if not specified 
+  LogfileMaxLines: 500
+  # How much information do we write to the log file. One of: none; error; warning; summary; detailed; debug, all. Defaults to detailed if not specified.
+  LogfileVerbosity: all
+  # How much information do we write to the console. One of: error; warning; summary; detailed; debug, all. Defaults to summary if not specified.
+  ConsoleVerbosity: detailed
+
+
+# Enter your settings here if you want to be emailed when there's a critical error 
+Email:
+  EnableEmail: True
+  SendEmailsTo: 
+  SMTPServer: smtp.gmail.com
+  SMTPPort: 587
+  SMTPUsername: 
+  SMTPPassword: 
+  SubjectPrefix: 

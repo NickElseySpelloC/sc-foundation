@@ -1,0 +1,12 @@
+{
+    "DaysOfWeek": "Sat,Sun,Tue",
+    "string": "Hello, World!",
+    "integer": 42,
+    "float": 123.456,
+    "datetime": "2026-04-20T11:43:38.153314+10:00",
+    "datetime__datatype": "datetime",
+    "date": "2026-04-20",
+    "date__datatype": "date",
+    "api_mode": "Live Prices",
+    "api_mode__enum": "__main__.APIMode.LIVE"
+}

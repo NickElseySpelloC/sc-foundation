@@ -1,0 +1,20 @@
+2026-04-20 12:09:22: [Proc 79300] Test message from test_log_normal
+2026-04-20 12:09:22 ERROR: [Proc 79300] Test error message from test_log_error
+2026-04-20 12:09:24: [Proc 79300] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 12:09:27: [Proc 79300] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 12:12:27: [Proc 79901] Test message from test_log_normal
+2026-04-20 12:12:27 ERROR: [Proc 79901] Test error message from test_log_error
+2026-04-20 12:12:29: [Proc 79901] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 12:12:32: [Proc 79901] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 12:13:24: [Proc 80113] Test message from test_log_normal
+2026-04-20 12:13:24 ERROR: [Proc 80113] Test error message from test_log_error
+2026-04-20 12:13:26: [Proc 80113] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 12:13:29: [Proc 80113] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 12:14:13: [Proc 80288] Test message from test_log_normal
+2026-04-20 12:14:13 ERROR: [Proc 80288] Test error message from test_log_error
+2026-04-20 12:14:15: [Proc 80288] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 12:14:17: [Proc 80288] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 13:29:26: [Proc 90414] Test message from test_log_normal
+2026-04-20 13:29:26 ERROR: [Proc 90414] Test error message from test_log_error
+2026-04-20 13:29:29: [Proc 90414] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 13:29:32: [Proc 90414] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
