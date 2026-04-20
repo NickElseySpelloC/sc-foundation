@@ -26,3 +26,7 @@
 2026-04-20 13:36:03 ERROR: [Proc 91705] Test error message from test_log_error
 2026-04-20 13:36:05: [Proc 91705] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
 2026-04-20 13:36:08: [Proc 91705] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 13:46:57: [Proc 93487] Test message from test_log_normal
+2026-04-20 13:46:57 ERROR: [Proc 93487] Test error message from test_log_error
+2026-04-20 13:47:00: [Proc 93487] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
+2026-04-20 13:47:02: [Proc 93487] Test mode: Email with subject '[SC_Utility Test Suite]: Hello world' would be sent to nick@elseyworld.com.
