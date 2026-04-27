@@ -369,7 +369,9 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
@@ -815,6 +817,7 @@ Email:
 <h2 id="example-code">Example code</h2>
 <p>Here's an example module that shows how to use the library classes. Use the <strong>API Reference</strong> navigation to view the API methods for each class. The code example and the companion config and Excel files is available in the examples/ folder in the Github repo.</p>
 <pre><code class="language-python">
+  # ruff: noqa: INP001
   &quot;&quot;&quot;Example code using the sc-foundation libraries.&quot;&quot;&quot;
 
   import datetime as dt
@@ -826,7 +829,6 @@ Email:
   from sc_foundation import CSVReader, DateHelper, SCConfigManager, SCLogger
 
   CONFIG_FILE = &quot;examples/example_config.yaml&quot;
-  EXCEL_FILE = &quot;examples/example_excel.xlsx&quot;
   CSV_FILE = &quot;examples/example_csv.csv&quot;
 
 
@@ -988,7 +990,7 @@ Email:
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": [], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.expand"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
