@@ -135,7 +135,7 @@ def test_get_project_root():
 
     # Test environment variable override
     special_dir = "/Users/nick/dev/sc-foundation"
-    os.environ["SC_UTILITY_PROJECT_ROOT"] = special_dir
+    os.environ["SC_FOUNDATION_PROJECT_ROOT"] = special_dir
     root = SCCommon.get_project_root()
     assert root is not None
     assert root.is_dir()

@@ -3,6 +3,8 @@ site_url: https://github.com/NickElseySpelloC/sc-foundation
 
 theme:
   name: material
+  features:
+    - navigation.expand
 
 plugins:
   - search

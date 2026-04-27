@@ -1,3 +1,4 @@
+# ruff: noqa: INP001
 """Example code using the sc-foundation libraries."""
 
 import datetime as dt
@@ -9,7 +10,6 @@ from example_config_schemas import ConfigSchema
 from sc_foundation import CSVReader, DateHelper, SCConfigManager, SCLogger
 
 CONFIG_FILE = "examples/example_config.yaml"
-EXCEL_FILE = "examples/example_excel.xlsx"
 CSV_FILE = "examples/example_csv.csv"
 
 

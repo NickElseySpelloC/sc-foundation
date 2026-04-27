@@ -12,8 +12,6 @@ from tzfpy import get_tz
 
 from sc_foundation.sc_common import SCCommon
 
-_LOCAL_TZ = dt.datetime.now().astimezone().tzinfo
-
 
 class DateHelper:  # noqa: PLR0904
     """
@@ -471,7 +469,8 @@ class DateHelper:  # noqa: PLR0904
         Returns:
             tzinfo (tzinfo): The local timezone of the system.
         """
-        return _LOCAL_TZ  # pyright: ignore[reportReturnType]
+        local_tz = dt.datetime.now().astimezone().tzinfo    # Issue 1
+        return local_tz  # pyright: ignore[reportReturnType]
 
     @staticmethod
     def is_valid_date(date_str: str, format_str: str = "%Y-%m-%d") -> bool:
