@@ -258,7 +258,9 @@ class SCLogger:
         # See if the body string is something that looks like a file path
         try:
             payload_path = SCCommon.select_file_location(str(body))
-        except OSError:
+            assert isinstance(payload_path, Path), "select_file_location should return a Path object"
+            payload_path.exists()
+        except (AssertionError, OSError):
             # Nothing to do here
             payload_path = None
 

@@ -14,7 +14,7 @@ from sc_foundation import (
 )
 
 CONFIG_FILE = "development/dev_config.yaml"
-
+MESSAGE_TEXT = "development/long_message.txt"
 
 def test_reportable_issue(logger: SCLogger):
     # Log a reportable issue
@@ -33,6 +33,14 @@ def test_reportable_issue(logger: SCLogger):
         if logger.report_notifiable_issue(entity, issue, send_delay, message):
             print("Email sent for reportable issue.")
             logger.clear_notifiable_issue(entity, issue)
+
+def log_fatal_error(logger: SCLogger):
+    # Log a fatal issue
+    with open(MESSAGE_TEXT, 'r') as f:
+        message = f.read()
+
+    logger.log_fatal_error(message, exit_app=False)
+    print("Logged fatal error without exiting the app.")
 
 
 def main():
@@ -78,6 +86,7 @@ def main():
         logger.clear_fatal_error()
 
     #  test_reportable_issue(logger)
+    log_fatal_error(logger)
 
 
 if __name__ == "__main__":
