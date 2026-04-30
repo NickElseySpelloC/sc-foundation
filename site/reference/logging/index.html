@@ -1115,7 +1115,7 @@
 
 
 <h2 id="sc_foundation.sc_logging.SCLogger.log_fatal_error" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">log_fatal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">report_stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">calling_function</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">log_fatal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">report_stack</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">calling_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exit_app</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
 
 </h2>
 
@@ -1182,6 +1182,22 @@
             </td>
             <td>
                   <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>exit_app</code>
+            </td>
+            <td>
+                  <code><span title="Optional">Optional</span>[<span title="bool">bool</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, the program will be exited after logging the fatal error. Defaults to True.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
             </td>
           </tr>
       </tbody>

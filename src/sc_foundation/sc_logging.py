@@ -350,7 +350,7 @@ class SCLogger:
         else:
             return True  # Email sent successfully
 
-    def log_fatal_error(self, message: str, report_stack: bool = False, calling_function: str | None = None) -> None:
+    def log_fatal_error(self, message: str, report_stack: bool = False, calling_function: str | None = None, exit_app: bool = True) -> None:
         """
         Log a fatal error, send an email if configured to so and then exit the program.
 
@@ -358,6 +358,7 @@ class SCLogger:
             message (str): The error message to log.
             report_stack (Optional[bool], optional): If True, include the stack trace in the log message.
             calling_function (Optional[str], optional): The name of the function that called this method, if known. If None, the calling function will be determined automatically.
+            exit_app (Optional[bool], optional): If True, the program will be exited after logging the fatal error. Defaults to True.
 
         Raises:
             SystemExit: Exits the program with a status code of 1 after logging the fatal error.
@@ -400,7 +401,8 @@ class SCLogger:
         self.set_fatal_error(message)
 
         # Exit the program
-        sys.exit(1)
+        if exit_app:
+            sys.exit(1)
 
     def get_fatal_error(self) -> bool:
         """Returns True if a fatal error was previously reported, false otherwise."""
