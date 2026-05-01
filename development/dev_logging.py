@@ -1,6 +1,7 @@
 """Manual testing code for the sc_foundation libraries. Should not be included in the distrbution."""
 
 import datetime as dt  # noqa: F401
+import pathlib
 import platform
 import sys
 from time import sleep
@@ -15,6 +16,7 @@ from sc_foundation import (
 
 CONFIG_FILE = "development/dev_config.yaml"
 MESSAGE_TEXT = "development/long_message.txt"
+
 
 def test_reportable_issue(logger: SCLogger):
     # Log a reportable issue
@@ -34,10 +36,10 @@ def test_reportable_issue(logger: SCLogger):
             print("Email sent for reportable issue.")
             logger.clear_notifiable_issue(entity, issue)
 
+
 def log_fatal_error(logger: SCLogger):
     # Log a fatal issue
-    with open(MESSAGE_TEXT, 'r') as f:
-        message = f.read()
+    message = pathlib.Path(MESSAGE_TEXT).read_text(encoding="utf-8")
 
     logger.log_fatal_error(message, exit_app=False)
     print("Logged fatal error without exiting the app.")

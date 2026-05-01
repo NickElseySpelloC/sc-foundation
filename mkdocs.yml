@@ -29,3 +29,4 @@ nav:
       - CSVReader: reference/csvreader.md
       - DateHelper: reference/datehelper.md
       - JSONEncoder: reference/jsonencoder.md
+      - ThreadManager: reference/thread_manager.md
