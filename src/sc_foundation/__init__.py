@@ -9,6 +9,7 @@ from .sc_csv_reader import CSVReader
 from .sc_date_helper import DateHelper
 from .sc_json_encoder import JSONEncoder
 from .sc_logging import SCLogger
+from .thread_manager import ManagedThread, RestartPolicy, ThreadManager
 from .validation_schema import yaml_config_validation
 
-__all__ = ["CSVReader", "DateHelper", "JSONEncoder", "SCCommon", "SCConfigManager", "SCLogger", "yaml_config_validation"]
+__all__ = ["CSVReader", "DateHelper", "JSONEncoder", "ManagedThread", "RestartPolicy", "SCCommon", "SCConfigManager", "SCLogger", "ThreadManager", "yaml_config_validation"]
