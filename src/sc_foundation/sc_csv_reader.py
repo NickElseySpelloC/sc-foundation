@@ -119,7 +119,12 @@ class CSVReader:
 
         # Read the CSV file
         csv_data = []
-        with self.file_path.open(newline="", encoding="utf-8") as csvfile:  # noqa: PLR1702
+        try:
+            csvfile = self.file_path.open(newline="", encoding="utf-8")
+        except UnicodeDecodeError:  # Issue #4
+            csvfile = self.file_path.open(newline="", encoding="latin-1")
+
+        with csvfile:  # noqa: PLR1702
             reader = csv.reader(csvfile)
 
             # Read the header
@@ -441,14 +446,24 @@ class CSVReader:
         if use_temp_file:
             temporary_path = self.file_path.with_suffix(".tmp")
 
-            with temporary_path.open("w", newline="", encoding="utf-8") as csvfile:
+            try:
+                csvfile = temporary_path.open("w", newline="", encoding="utf-8")
+            except UnicodeDecodeError:  # Issue #4
+                csvfile = temporary_path.open("w", newline="", encoding="latin-1")
+
+            with csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=[header["name"] for header in self.header_config])
                 writer.writeheader()
                 writer.writerows(formatted_data)
             # Replace the original file with the temporary file
             temporary_path.replace(self.file_path)
         else:
-            with self.file_path.open("w", newline="", encoding="utf-8") as csvfile:
+            try:
+                csvfile = self.file_path.open("w", newline="", encoding="utf-8")
+            except UnicodeDecodeError:  # Issue #4
+                csvfile = self.file_path.open("w", newline="", encoding="latin-1")
+
+            with csvfile:
                 writer = csv.DictWriter(csvfile, fieldnames=[header["name"] for header in self.header_config])
                 writer.writeheader()
                 writer.writerows(formatted_data)

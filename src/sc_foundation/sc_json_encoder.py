@@ -105,10 +105,16 @@ class JSONEncoder:
         try:
             temporary_path = file_path.with_suffix(".tmp")
 
-            with temporary_path.open("w", encoding="utf-8") as json_file:
-                save_data = copy.deepcopy(data)
-                save_data = JSONEncoder._add_datatype_hints(save_data)
-                json.dump(save_data, json_file, indent=4, default=JSONEncoder._encode_object)
+            try:
+                with temporary_path.open("w", encoding="utf-8") as json_file:
+                    save_data = copy.deepcopy(data)
+                    save_data = JSONEncoder._add_datatype_hints(save_data)
+                    json.dump(save_data, json_file, indent=4, default=JSONEncoder._encode_object)
+            except UnicodeEncodeError:
+                with temporary_path.open("w", encoding="latin-1") as json_file:
+                    save_data = copy.deepcopy(data)
+                    save_data = JSONEncoder._add_datatype_hints(save_data)
+                    json.dump(save_data, json_file, indent=4, default=JSONEncoder._encode_object)
 
             temporary_path.replace(file_path)
         except (TypeError, ValueError, OSError) as e:
@@ -132,10 +138,16 @@ class JSONEncoder:
             return None
 
         try:
-            with file_path.open("r", encoding="utf-8") as json_file:
-                json_data = json.load(json_file)
-                return_data = JSONEncoder.decode_object(json_data)
-                return return_data
+            try:
+                with file_path.open("r", encoding="utf-8") as json_file:
+                    json_data = json.load(json_file)
+                    return_data = JSONEncoder.decode_object(json_data)
+                    return return_data
+            except UnicodeDecodeError:
+                with file_path.open("r", encoding="latin-1") as json_file:
+                    json_data = json.load(json_file)
+                    return_data = JSONEncoder.decode_object(json_data)
+                    return return_data
         except (json.JSONDecodeError, OSError) as e:
             raise RuntimeError from e
 
