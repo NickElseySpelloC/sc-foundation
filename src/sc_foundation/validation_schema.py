@@ -25,4 +25,14 @@ yaml_config_validation = {
             "SubjectPrefix": {"type": "string", "required": False, "nullable": True},
         },
     },
+    "HeartbeatMonitor": {
+        "type": "dict",
+        "required": False,
+        "schema": {
+            "Enable": {"type": "boolean", "required": False, "nullable": True},
+            "WebsiteURL": {"type": "string", "required": False, "nullable": True},
+            "HeartbeatTimeout": {"type": "number", "required": False, "nullable": True, "min": 1, "max": 60},
+            "Frequency": {"type": "number", "required": False, "nullable": True, "min": 1, "max": 3600},
+        },
+    },
 }

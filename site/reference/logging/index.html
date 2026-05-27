@@ -480,10 +480,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sc_foundation.sc_logging.SCLogger.ping_heartbeat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ping_heartbeat
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sc_foundation.sc_logging.SCLogger.register_email_settings" class="md-nav__link">
     <span class="md-ellipsis">
       
         register_email_settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_foundation.sc_logging.SCLogger.register_heartbeat_monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        register_heartbeat_monitor
       
     </span>
   </a>
@@ -777,10 +799,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sc_foundation.sc_logging.SCLogger.ping_heartbeat" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ping_heartbeat
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sc_foundation.sc_logging.SCLogger.register_email_settings" class="md-nav__link">
     <span class="md-ellipsis">
       
         register_email_settings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_foundation.sc_logging.SCLogger.register_heartbeat_monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        register_heartbeat_monitor
       
     </span>
   </a>
@@ -887,7 +931,7 @@
 
 
 <h2 id="sc_foundation.sc_logging.SCLogger.__init__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">logger_settings</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">logger_settings</span><span class="p">,</span> <span class="n">heartbeat_config</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h2>
 
@@ -923,7 +967,7 @@
                 <code>logger_settings</code>
             </td>
             <td>
-                  <code><span title="Optional">Optional</span>[<span title="dict">dict</span>]</code>
+                  <code><span title="dict">dict</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -932,6 +976,22 @@
             </td>
             <td>
                 <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>heartbeat_config</code>
+            </td>
+            <td>
+                  <code><span title="Optional">Optional</span>[<span title="dict">dict</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing the heartbeat monitor configuration.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
       </tbody>
@@ -1350,6 +1410,78 @@
 <div class="doc doc-object doc-function">
 
 
+<h2 id="sc_foundation.sc_logging.SCLogger.ping_heartbeat" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">ping_heartbeat</span><span class="p">(</span><span class="n">is_fail</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Ping the heartbeat URL if it's time to do so or is_fail is True.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>is_fail</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, the heartbeat will be considered a failure.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bool</code></td>            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True if the heartbeat URL is reachable or there's nothing to do, False otherwise.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h2 id="sc_foundation.sc_logging.SCLogger.register_email_settings" class="doc doc-heading">
             <code class="highlight language-python"><span class="n">register_email_settings</span><span class="p">(</span><span class="n">email_settings</span><span class="p">)</span></code>
 
@@ -1427,6 +1559,86 @@ SubjectPrefix: str, a prefix for email subjects (optional, default to None)
             <td>
               <div class="doc-md-description">
                 <p>If any required keys are missing from the email_settings dictionary.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="sc_foundation.sc_logging.SCLogger.register_heartbeat_monitor" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">register_heartbeat_monitor</span><span class="p">(</span><span class="n">config</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Register the configuration for the heartbeat monitor.</p>
+<p>The config dictionary should have the following structure:</p>
+<pre><code>{
+    "Enable": bool,  # Whether to enable the heartbeat monitor
+    "WebsiteURL": str,  # The URL to ping for the heartbeat
+    "HeartbeatTimeout": int,  # The timeout in seconds for the heartbeat ping (optional, defaults to 10)
+    "Frequency": int,  # The minimum frequency in seconds to ping the heartbeat URL (optional, defaults to 30)
+}
+</code></pre>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>config</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing the heartbeat monitor configuration.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="TypeError">TypeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If any of the required keys are missing from the config dictionary or if any of the values are of the wrong type or invalid.</p>
               </div>
             </td>
           </tr>

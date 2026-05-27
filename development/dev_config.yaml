@@ -22,3 +22,9 @@ Email:
   SMTPServer: smtp.gmail.com
   SMTPPort: 587
   SubjectPrefix: 
+
+HeartbeatMonitor:
+  Enable: True
+  WebsiteURL: https://uptime.betterstack.com/api/v1/heartbeat/zcsNtnEQHRDNWJENvcZc94fx
+  HeartbeatTimeout: 5
+  Frequency: 20

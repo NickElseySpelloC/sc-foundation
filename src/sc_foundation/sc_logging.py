@@ -15,6 +15,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
 
+import requests
+
 from sc_foundation.sc_common import SCCommon
 from sc_foundation.sc_date_helper import DateHelper
 
@@ -33,7 +35,7 @@ class NotifiableIssue:
 class SCLogger:
     """A class to handle logging messages with different verbosity levels."""
 
-    def __init__(self, logger_settings: dict):
+    def __init__(self, logger_settings: dict, heartbeat_config: dict | None = None):
         """
         Initializes the logger with configuration settings.
 
@@ -49,7 +51,8 @@ class SCLogger:
             }
 
         Args:
-            logger_settings (Optional[dict]): A dictionary containing logger settings
+            logger_settings (dict): A dictionary containing logger settings
+            heartbeat_config (Optional[dict]): A dictionary containing the heartbeat monitor configuration.
         """
         # Make a note of the app directory
         self.app_dir = self.client_dir = SCCommon.get_project_root()
@@ -84,6 +87,12 @@ class SCLogger:
         # Serialize logfile I/O across threads (trim/write must not interleave)
         self._logfile_lock = threading.RLock()
         self._fatal_error_file_lock = threading.RLock()
+
+        # Set up the heartbeat monitor attributes
+        self.heartbeat_config = {}
+        self.heartbeat_last_post = None
+        if heartbeat_config is not None:
+            self.register_heartbeat_monitor(heartbeat_config)
 
         self.initialise_settings(logger_settings)
 
@@ -512,3 +521,91 @@ class SCLogger:
                 return True
 
         return False
+
+    def register_heartbeat_monitor(self, config: dict):
+        """
+        Register the configuration for the heartbeat monitor.
+
+        The config dictionary should have the following structure:
+
+            {
+                "Enable": bool,  # Whether to enable the heartbeat monitor
+                "WebsiteURL": str,  # The URL to ping for the heartbeat
+                "HeartbeatTimeout": int,  # The timeout in seconds for the heartbeat ping (optional, defaults to 10)
+                "Frequency": int,  # The minimum frequency in seconds to ping the heartbeat URL (optional, defaults to 30)
+            }
+
+        Args:
+            config (dict): A dictionary containing the heartbeat monitor configuration.
+
+        Raises:
+            TypeError: If any of the required keys are missing from the config dictionary or if any of the values are of the wrong type or invalid.
+        """
+        # Do some validation of the config dictionary
+        is_enabled = config.get("Enable", False)
+        heartbeat_url = config.get("WebsiteURL")
+        timeout = config.get("HeartbeatTimeout", 10)
+        frequency = config.get("Frequency", 30)
+
+        if not isinstance(is_enabled, bool):
+            msg = "Heartbeat config 'Enable' key must be a boolean."
+            raise TypeError(msg)
+        if not isinstance(heartbeat_url, str):
+            msg = "Heartbeat config 'WebsiteURL' key must be a string."
+            raise TypeError(msg)
+        if not isinstance(timeout, int) or timeout <= 0:
+            msg = "Heartbeat config 'HeartbeatTimeout' key must be a positive integer."
+            raise TypeError(msg)
+        if not isinstance(frequency, int) or frequency <= 0:
+            msg = "Heartbeat config 'Frequency' key must be a positive integer."
+            raise TypeError(msg)
+
+        self.heartbeat_config = config
+        self.heartbeat_last_post = None
+
+    def ping_heartbeat(self, is_fail: bool | None = None) -> bool:
+        """Ping the heartbeat URL if it's time to do so or is_fail is True.
+
+        Args:
+            is_fail (bool, optional): If True, the heartbeat will be considered a failure.
+
+        Returns:
+            bool: True if the heartbeat URL is reachable or there's nothing to do, False otherwise.
+        """
+        # Screen the barrier conditions for whether we need to ping the heartbeat URL
+        if not self.heartbeat_config:
+            return True  # No heartbeat config, so nothing to do
+
+        assert isinstance(self.heartbeat_config, dict), "Heartbeat config must be a dictionary"
+        is_enabled = self.heartbeat_config.get("Enable", False)
+        heartbeat_url = self.heartbeat_config.get("WebsiteURL")
+        timeout = self.heartbeat_config.get("HeartbeatTimeout", 10)
+        frequency = self.heartbeat_config.get("Frequency", 30)
+
+        if not is_enabled or heartbeat_url is None:
+            return True
+        assert isinstance(heartbeat_url, str), "Heartbeat URL must be a string"
+
+        if self.heartbeat_last_post is not None:
+            time_since_last_post = (DateHelper.now() - self.heartbeat_last_post).total_seconds()
+            if time_since_last_post < frequency:  # pyright: ignore[reportOperatorIssue]
+                return True
+
+        if is_fail:
+            heartbeat_url += "/fail"
+
+        try:
+            response = requests.get(heartbeat_url, timeout=timeout)  # type: ignore[call-arg]
+        except requests.exceptions.Timeout as e:
+            self.log_message(f"Timeout making Heartbeat ping: {e}", "error")
+            return False
+        except requests.RequestException as e:
+            self.log_message(f"Heartbeat ping failed: {e}", "error")
+            return False
+        else:
+            self.heartbeat_last_post = DateHelper.now()
+            if response.status_code == 200:
+                # self.log_message(f"Heartbeat ping posted to {heartbeat_url}", "debug")
+                return True
+            self.log_message(f"Heartbeat ping failed with status code: {response.status_code}", "error")
+            return False

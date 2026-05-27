@@ -67,7 +67,8 @@ def main():
     # Initialize the SC_Logger class
     try:
         logger_settings = config.get_logger_settings()
-        logger = SCLogger(logger_settings)
+        heartbeat_config = config.get("HeartbeatMonitor")
+        logger = SCLogger(logger_settings, heartbeat_config=heartbeat_config)
     except RuntimeError as e:
         print(f"Logger initialisation error: {e}", file=sys.stderr)
         return
@@ -82,13 +83,26 @@ def main():
         else:
             print("Test email failed to send.")
 
+    # Ping the heartbeat monitor    if heartbeat_config is not None:
+    if logger.ping_heartbeat():
+        print("Heartbeat ping successful.")
+    else:
+        print("Heartbeat ping failed.")
+
+    # Wait 2 seconds and ping again to test the frequency setting
+    sleep(2)
+    if logger.ping_heartbeat():
+        print("Second heartbeat ping successful.")
+    else:
+        print("Second heartbeat ping failed due to frequency limit.")
+
     # See if we have a fatal error from a previous run
     if logger.get_fatal_error():
         print("Prior fatal error detected.")
         logger.clear_fatal_error()
 
-    #  test_reportable_issue(logger)
-    log_fatal_error(logger)
+    # test_reportable_issue(logger)
+    # log_fatal_error(logger)
 
 
 if __name__ == "__main__":

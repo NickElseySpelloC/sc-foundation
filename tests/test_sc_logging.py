@@ -28,7 +28,8 @@ except RuntimeError as e:
 
 # Initialize the SC_Logger class
 try:
-    logger = SCLogger(config.get_logger_settings())
+    heartbeat_config = config.get("HeartbeatMonitor")
+    logger = SCLogger(config.get_logger_settings(), heartbeat_config=heartbeat_config)
 except RuntimeError as e:
     print(f"Logger initialisation error: {e}", file=sys.stderr)
     sys.exit(1)
@@ -81,6 +82,14 @@ def test_send_email():
         assert logger.send_email("Hello world", text_content_path, test_mode=True), "Sending text file email."
     else:
         print("No email settings found in the configuration, skipping email test.")
+
+
+def test_heartbeat():
+    """Test heartbeat monitor."""
+    if logger.ping_heartbeat():
+        print("Heartbeat ping successful.")
+    else:
+        print("Heartbeat ping failed.")
 
 
 # test_register_email_settings()
