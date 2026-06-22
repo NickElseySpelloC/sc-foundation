@@ -22,3 +22,16 @@ Email:
   SMTPServer: smtp.gmail.com
   SMTPPort: 587
   SubjectPrefix: 
+
+HeartbeatMonitor:
+  Enable: True
+  WebsiteURL: https://uptime.betterstack.com/api/v1/heartbeat/zcsNtnEQHRDNWJENvcZc94fx
+  HeartbeatTimeout: 5
+  Frequency: 20
+
+
+Location:
+  Latitude: -33.86
+  Longitude: 151.21
+  Timezone: "Australia/Sydney"
+  GoogleMapsURL: "https://www.google.com/maps/place/Sydney+NSW/@-33.8688,151.2093,15z"
