@@ -1,5 +1,6 @@
 """Common functions and classes used by other classes in the sc_foundation package."""
 
+import datetime as dt
 import ipaddress
 import os
 import platform
@@ -8,7 +9,19 @@ import subprocess  # noqa: S404
 from pathlib import Path
 
 import httpx
+import requests
 import validators
+from tzfpy import get_tz
+
+HTTP_TIMEOUT = 10
+UA = {"User-Agent": "failover-monitor/1.0"}
+# Multiple IP-echo services, tried in order — protects against any one being down.
+IP_ECHO_URLS = [
+    "https://api.ipify.org",
+    "https://icanhazip.com",
+    "https://ifconfig.me/ip",
+    "https://checkip.amazonaws.com",
+]
 
 
 class SCCommon:
@@ -332,6 +345,31 @@ class SCCommon:
         return os.getpid()
 
     @staticmethod
+    def get_external_ip() -> str:
+        """
+        Query multiple external IP-echo services in turn to get the public IP address of the machine.
+
+        Returns:
+            The external IP address as a string.
+
+        Raises:
+            RuntimeError: If all IP-echo services fail.
+        """
+        last_err = None
+        for url in IP_ECHO_URLS:
+            try:
+                r = requests.get(url, headers=UA, timeout=HTTP_TIMEOUT)
+                r.raise_for_status()
+                ip = r.text.strip()
+                if ip:
+                    return ip
+            except requests.RequestException as e:
+                last_err = e
+                continue
+        error_msg = f"All IP-echo services failed. Last error: {last_err}"
+        raise RuntimeError(error_msg)
+
+    @staticmethod
     def _create_folder_if_not_exists(folder_path: Path) -> None:
         """Create the folder if it does not exist.
 
@@ -347,3 +385,94 @@ class SCCommon:
             except OSError as e:
                 error_msg = f"Error creating folder '{folder_path}': {e}"
                 raise RuntimeError(error_msg) from e
+
+    @staticmethod
+    def get_geo_location(location_config: dict | None = None, google_maps_url: str | None = None) -> dict:
+        """Get the geographical location based on the provided configuration.
+
+        Args:
+            location_config: A dictionary containing location configuration. If None, defaults to an empty dictionary.
+            google_maps_url: A Google Maps URL to extract the location from. If None, defaults to None.
+
+        location_config is the YAML Location configuration dictionary. It can conatin the following keys (examples shown):
+            - Latitude: 51.4993124
+            - Longitude: -0.1353157
+            - GoogleMapsURL: https://www.google.com/maps/place/Buckingham+Palace/@51.4993124,-0.1353157,14.92z
+
+        The returned dictionary will contain the following keys:
+            - method: The method used to determine the location (e.g., "config", "google_maps_url").
+            - latitude: The latitude of the location.
+            - longitude: The longitude of the location.
+            - timezone: The timezone of the location (if available).
+            - city, state and country if available from a lookup on openstreetmap.org.
+
+        If location_config contains a lat/long pair, this will be used directly. If it contains a Google Maps URL,
+        the lat/long will be extracted from the URL. If neither is provided, the function will attempt to determine
+        the location using other means (e.g., IP-based geolocation).
+
+        Returns:
+            A dictionary containing the geographical location information.
+        """
+        if location_config is None:
+            location_config = {}
+
+        tz = lat = lon = method = None
+
+        if location_config.get("Latitude") is not None and location_config.get("Longitude") is not None:
+            lat = location_config["Latitude"]
+            lon = location_config["Longitude"]
+            tz = location_config.get("Timezone")
+            method = "config: lat-long"
+
+        elif location_config.get("GoogleMapsURL") is not None or google_maps_url is not None:
+            url = location_config.get("GoogleMapsURL") or google_maps_url
+            match = re.search(r"@?([-]?\d+\.\d+),([-]?\d+\.\d+)", url)  # pyright: ignore[reportArgumentType, reportCallIssue]
+            if match:
+                lat = float(match.group(1))
+                lon = float(match.group(2))
+                method = "config: google url"
+
+        # Default to IP-based geolocation if no lat/long or Google Maps URL is provided. This will require an external service or library to determine the location based on the public IP address.
+        if lat is None or lon is None:
+            try:
+                external_ip = SCCommon.get_external_ip()
+
+                r = requests.get(f"https://ipinfo.io/{external_ip}/json", timeout=HTTP_TIMEOUT).json()  # omit IP to get your own
+            except Exception:  # noqa: BLE001
+                external_ip = None
+            else:
+                method = "ip-based geolocation"
+                lat, lon = map(float, r["loc"].split(","))
+
+        # Last resort: if we still don't have lat/lon, default to 0,0 and UTC timezone
+        if lat is None or lon is None:
+            tz = tz or "UTC"
+            lat = 0.0
+            lon = 0.0
+            method = "default"
+
+        # If we have lat/long but not tz, get the timezone using tzfpy. If tzfpy fails, default to the system timezone.
+        if tz is None:
+            tz_name = get_tz(lon, lat)
+            tz = tz_name or str(dt.datetime.now().astimezone().tzinfo)
+
+        return_dict = {
+            "method": method,
+            "latitude": lat,
+            "longitude": lon,
+            "timezone": tz,
+        }
+
+        # Lookup city, etc. using lat/lon if we have them and the method is not already "config: lat-long" or "config: google url"
+        if lat is not None and lon is not None:
+            try:
+                r = requests.get(f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}", headers=UA, timeout=HTTP_TIMEOUT).json()
+                if "address" in r:
+                    address = r["address"]
+                    return_dict["city"] = address.get("city") or address.get("town") or address.get("village") or address.get("hamlet")
+                    return_dict["state"] = address.get("state")
+                    return_dict["country"] = address.get("country")
+            except Exception:  # noqa: BLE001, S110
+                pass
+
+        return return_dict

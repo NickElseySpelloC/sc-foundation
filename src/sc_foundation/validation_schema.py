@@ -35,4 +35,15 @@ yaml_config_validation = {
             "Frequency": {"type": "number", "required": False, "nullable": True, "min": 1, "max": 3600},
         },
     },
+    "Location": {
+        "type": "dict",
+        "required": False,
+        "nullable": True,
+        "schema": {
+            "GoogleMapsURL": {"type": "string", "required": False, "nullable": True},
+            "Timezone": {"type": "string", "required": False, "nullable": True},
+            "Latitude": {"type": "number", "required": False, "nullable": True},
+            "Longitude": {"type": "number", "required": False, "nullable": True},
+        },
+    }
 }

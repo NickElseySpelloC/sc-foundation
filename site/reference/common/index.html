@@ -369,6 +369,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sc_foundation.sc_common.SCCommon.get_external_ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_external_ip
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_foundation.sc_common.SCCommon.get_geo_location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_geo_location
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sc_foundation.sc_common.SCCommon.get_os" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -700,6 +722,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sc_foundation.sc_common.SCCommon.get_external_ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_external_ip
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sc_foundation.sc_common.SCCommon.get_geo_location" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        get_geo_location
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sc_foundation.sc_common.SCCommon.get_os" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -996,6 +1040,184 @@
             <td>
               <div class="doc-md-description">
                 <p>True if the system is connected to the internet, False otherwise.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="sc_foundation.sc_common.SCCommon.get_external_ip" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_external_ip</span><span class="p">()</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Query multiple external IP-echo services in turn to get the public IP address of the machine.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The external IP address as a string.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="RuntimeError">RuntimeError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If all IP-echo services fail.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="sc_foundation.sc_common.SCCommon.get_geo_location" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">get_geo_location</span><span class="p">(</span><span class="n">location_config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">google_maps_url</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the geographical location based on the provided configuration.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>location_config</code>
+            </td>
+            <td>
+                  <code><span title="dict">dict</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing location configuration. If None, defaults to an empty dictionary.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>google_maps_url</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A Google Maps URL to extract the location from. If None, defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>location_config is the YAML Location configuration dictionary. It can conatin the following keys (examples shown):
+    - Latitude: 51.4993124
+    - Longitude: -0.1353157
+    - GoogleMapsURL: https://www.google.com/maps/place/Buckingham+Palace/@51.4993124,-0.1353157,14.92z</p>
+
+
+<details class="the-returned-dictionary-will-contain-the-following-keys" open>
+  <summary>The returned dictionary will contain the following keys</summary>
+  <ul>
+<li>method: The method used to determine the location (e.g., "config", "google_maps_url").</li>
+<li>latitude: The latitude of the location.</li>
+<li>longitude: The longitude of the location.</li>
+<li>timezone: The timezone of the location (if available).</li>
+<li>city, state and country if available from a lookup on openstreetmap.org.</li>
+</ul>
+</details>        <p>If location_config contains a lat/long pair, this will be used directly. If it contains a Google Maps URL,
+the lat/long will be extracted from the URL. If neither is provided, the function will attempt to determine
+the location using other means (e.g., IP-based geolocation).</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="dict">dict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A dictionary containing the geographical location information.</p>
               </div>
             </td>
           </tr>

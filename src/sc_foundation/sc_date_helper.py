@@ -4,6 +4,7 @@ import contextlib
 import datetime as dt
 import json
 from pathlib import Path
+from warnings import deprecated
 
 import pytz
 from astral import LocationInfo
@@ -690,6 +691,7 @@ class DateHelper:  # noqa: PLR0904
         return dt_obj.replace(tzinfo=None)
 
     @staticmethod
+    @deprecated("This function is deprecated. Use the dawn_dusk_times() function instead. Version=3.2.0")
     def get_dawn_dusk_times(latitude: float, longitude: float, timezone: str | None = None, as_at: dt.date | None = None) -> dict:
         """Get the dawn and dusk times based on the location returned from the configured location configuration.
 
@@ -713,7 +715,6 @@ class DateHelper:  # noqa: PLR0904
         Returns:
             result (dict): A dictionary containing the following key described above.
         """
-        name = "sc_foundation DateHelper"
         if timezone is None:
             tz_name = get_tz(longitude, latitude)
             timezone = tz_name or str(dt.datetime.now().astimezone().tzinfo)
@@ -721,7 +722,51 @@ class DateHelper:  # noqa: PLR0904
         if as_at is None:
             as_at = DateHelper.today(tzinfo=pytz.timezone(timezone))
 
+        return DateHelper._astral_times(latitude, longitude, timezone, as_at)
+
+    @staticmethod
+    def dawn_dusk_times(location_config: dict | None = None, google_maps_url: str | None = None, as_at: dt.date | None = None) -> dict:
+        """Get the dawn and dusk times based on the location returned from the configured location configuration.
+
+        If location_config is not provider, we will use the location fall back methods in SCCommon.get_geo_location()
+
+        The returned dict contains:
+            - as_date (date): The date for which the times are calculated.
+            - timezone (str): The timezone of the location.
+            - latitude (float): The latitude of the location.
+            - longitude (float): The longitude of the location.
+            - dawn (datetime): The dawn time.
+            - sunrise (datetime): The sunrise time.
+            - noon (datetime): The noon time.
+            - sunset (datetime): The sunset time.
+            - dusk (datetime): The dusk time.
+
+        Args:
+            location_config: A dictionary containing location configuration. If None, defaults to an empty dictionary.
+            google_maps_url: A Google Maps URL to extract the location from. If None, defaults to None.
+            as_at (date, optional): The date for which to get the dawn and dusk times. Defaults to today.
+
+        location_config is the YAML Location configuration dictionary. It can conatin the following keys (examples shown):
+            - Latitude: 51.4993124
+            - Longitude: -0.1353157
+            - GoogleMapsURL: https://www.google.com/maps/place/Buckingham+Palace/@51.4993124,-0.1353157,14.92z
+
+        Returns:
+            result (dict): A dictionary containing the following key described above.
+        """
+        geo_info = SCCommon.get_geo_location(location_config=location_config, google_maps_url=google_maps_url)
+
+        if as_at is None:
+            as_at = DateHelper.today(tzinfo=pytz.timezone(geo_info["timezone"]))
+
+        return DateHelper._astral_times(geo_info["latitude"], geo_info["longitude"], geo_info["timezone"], as_at)
+
+    # ==================================== INTERNAL FUNCTIONS ====================================
+
+    @staticmethod
+    def _astral_times(latitude: float, longitude: float, timezone: str, as_at: dt.date) -> dict:
         # Create location object and compute times
+        name = "sc_foundation DateHelper"
         location = LocationInfo(name=name, region="", timezone=timezone, latitude=latitude, longitude=longitude)
         s = sun(location.observer, date=as_at, tzinfo=pytz.timezone(timezone))
 
@@ -737,8 +782,6 @@ class DateHelper:  # noqa: PLR0904
             "dusk": s["dusk"],
         }
         return return_data
-
-    # ==================================== INTERNAL FUNCTIONS ====================================
 
     @staticmethod
     def _get_frozen_time() -> dt.datetime | None:  # noqa: PLR0915

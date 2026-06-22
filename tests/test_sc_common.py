@@ -214,3 +214,124 @@ def test_get_process_id_integration():
 # test_select_file_location_absolute_path()
 # test_select_file_location_relative_path()
 # test_get_project_root()
+
+
+# --- get_geo_location ---
+
+@patch("sc_foundation.sc_common.requests.get")
+@patch("sc_foundation.sc_common.get_tz")
+def test_get_geo_location_lat_lon_config(mock_get_tz, mock_requests_get):
+    """Lat/lon provided directly in config; Nominatim lookup succeeds."""
+    mock_get_tz.return_value = "Australia/Sydney"
+    nominatim_response = MagicMock()
+    nominatim_response.json.return_value = {
+        "address": {
+            "city": "Sydney",
+            "state": "New South Wales",
+            "country": "Australia",
+        }
+    }
+    mock_requests_get.return_value = nominatim_response
+
+    result = SCCommon.get_geo_location({
+        "Latitude": -33.86,
+        "Longitude": 151.21,
+        "Timezone": "Australia/Sydney",
+    })
+
+    assert result["method"] == "config: lat-long"
+    assert result["latitude"] == -33.86
+    assert result["longitude"] == 151.21
+    assert result["timezone"] == "Australia/Sydney"
+    assert result["city"] == "Sydney"
+    assert result["state"] == "New South Wales"
+    assert result["country"] == "Australia"
+
+
+@patch("sc_foundation.sc_common.requests.get")
+@patch("sc_foundation.sc_common.get_tz")
+def test_get_geo_location_google_maps_url(mock_get_tz, mock_requests_get):
+    """Lat/lon extracted from a Google Maps URL."""
+    mock_get_tz.return_value = "Europe/London"
+    nominatim_response = MagicMock()
+    nominatim_response.json.return_value = {
+        "address": {
+            "city": "London",
+            "state": "England",
+            "country": "United Kingdom",
+        }
+    }
+    mock_requests_get.return_value = nominatim_response
+
+    result = SCCommon.get_geo_location({
+        "GoogleMapsURL": "https://www.google.com/maps/place/Buckingham+Palace/@51.4993124,-0.1353157,14.92z"
+    })
+
+    assert result["method"] == "config: google url"
+    assert result["latitude"] == pytest.approx(51.4993124)
+    assert result["longitude"] == pytest.approx(-0.1353157)
+    assert result["city"] == "London"
+
+
+@patch("sc_foundation.sc_common.requests.get")
+@patch("sc_foundation.sc_common.get_tz")
+def test_get_geo_location_nominatim_failure_is_silent(mock_get_tz, mock_requests_get):
+    """Nominatim throwing an exception should not propagate; city/state/country keys absent."""
+    mock_get_tz.return_value = "Australia/Sydney"
+    mock_requests_get.side_effect = Exception("network error")
+
+    result = SCCommon.get_geo_location({
+        "Latitude": -33.86,
+        "Longitude": 151.21,
+        "Timezone": "Australia/Sydney",
+    })
+
+    assert result["method"] == "config: lat-long"
+    assert result["latitude"] == -33.86
+    assert "city" not in result
+    assert "country" not in result
+
+
+@patch("sc_foundation.sc_common.requests.get")
+@patch("sc_foundation.sc_common.SCCommon.get_external_ip")
+@patch("sc_foundation.sc_common.get_tz")
+def test_get_geo_location_ip_based_fallback(mock_get_tz, mock_get_ip, mock_requests_get):
+    """No config provided; falls back to IP-based geolocation."""
+    mock_get_tz.return_value = "America/New_York"
+    mock_get_ip.return_value = "8.8.8.8"
+
+    ipinfo_response = MagicMock()
+    ipinfo_response.json.return_value = {"loc": "40.7128,-74.0060"}
+
+    nominatim_response = MagicMock()
+    nominatim_response.json.return_value = {
+        "address": {
+            "city": "New York City",
+            "state": "New York",
+            "country": "United States",
+        }
+    }
+
+    mock_requests_get.side_effect = [ipinfo_response, nominatim_response]
+
+    result = SCCommon.get_geo_location()
+
+    assert result["method"] == "ip-based geolocation"
+    assert result["latitude"] == pytest.approx(40.7128)
+    assert result["longitude"] == pytest.approx(-74.0060)
+    assert result["city"] == "New York City"
+
+
+@patch("sc_foundation.sc_common.requests.get")
+@patch("sc_foundation.sc_common.SCCommon.get_external_ip")
+def test_get_geo_location_default_fallback(mock_get_ip, mock_requests_get):
+    """All external calls fail; falls back to 0,0 / UTC."""
+    mock_get_ip.side_effect = Exception("no network")
+    mock_requests_get.side_effect = Exception("no network")
+
+    result = SCCommon.get_geo_location()
+
+    assert result["method"] == "default"
+    assert result["latitude"] == 0.0
+    assert result["longitude"] == 0.0
+    assert result["timezone"] == "UTC"

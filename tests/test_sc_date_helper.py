@@ -3,11 +3,12 @@ import datetime as dt
 import json
 import time
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
+import pytz
 
 from sc_foundation import DateHelper, SCCommon
-from sc_foundation import sc_date_helper
 
 CONFIG_FILE = "tests/config.yaml"
 
@@ -255,13 +256,89 @@ def test_now_utc():
     assert time_now_utc.tzinfo == dt.UTC, "Timezone should be set to UTC"
 
 
-def test_get_dawn_dusk_times_auto_timezone(monkeypatch):
-    """Test automatic timezone lookup for dawn and dusk calculations."""
-    monkeypatch.setattr(sc_date_helper, "get_tz", lambda longitude, latitude: "Australia/Sydney")
+# --- dawn_dusk_times ---
 
-    result = DateHelper.get_dawn_dusk_times(-33.86, 151.21, timezone=None, as_at=dt.date(2026, 8, 1))
+_SYDNEY_GEO = {
+    "latitude": -33.86,
+    "longitude": 151.21,
+    "timezone": "Australia/Sydney",
+    "method": "config: lat-long",
+}
 
-    assert result["timezone"] == "Australia/Sydney", "Timezone should be resolved from coordinates"
+
+@patch("sc_foundation.sc_date_helper.SCCommon.get_geo_location")
+def test_dawn_dusk_times_all_keys_present(mock_geo):
+    """Result contains all documented keys."""
+    mock_geo.return_value = _SYDNEY_GEO
+
+    result = DateHelper.dawn_dusk_times(as_at=dt.date(2026, 8, 1))
+
+    assert result.keys() == {"as_date", "timezone", "latitude", "longitude", "dawn", "sunrise", "noon", "sunset", "dusk"}
+
+
+@patch("sc_foundation.sc_date_helper.SCCommon.get_geo_location")
+def test_dawn_dusk_times_lat_lon_config(mock_geo):
+    """Explicit lat/lon config: correct coordinates and timezone in result, get_geo_location called correctly."""
+    mock_geo.return_value = _SYDNEY_GEO
+    config = {"Latitude": -33.86, "Longitude": 151.21, "Timezone": "Australia/Sydney"}
+
+    result = DateHelper.dawn_dusk_times(location_config=config, as_at=dt.date(2026, 8, 1))
+
+    mock_geo.assert_called_once_with(location_config=config, google_maps_url=None)
+    assert result["latitude"] == -33.86
+    assert result["longitude"] == 151.21
+    assert result["timezone"] == "Australia/Sydney"
+    assert result["as_date"] == dt.date(2026, 8, 1)
+
+
+@patch("sc_foundation.sc_date_helper.SCCommon.get_geo_location")
+def test_dawn_dusk_times_google_maps_url(mock_geo):
+    """google_maps_url is forwarded to get_geo_location."""
+    mock_geo.return_value = {
+        "latitude": 51.4993124,
+        "longitude": -0.1353157,
+        "timezone": "Europe/London",
+        "method": "config: google url",
+    }
+    url = "https://www.google.com/maps/place/Buckingham+Palace/@51.4993124,-0.1353157,14.92z"
+
+    result = DateHelper.dawn_dusk_times(google_maps_url=url, as_at=dt.date(2026, 6, 21))
+
+    mock_geo.assert_called_once_with(location_config=None, google_maps_url=url)
+    assert result["latitude"] == pytest.approx(51.4993124)
+    assert result["timezone"] == "Europe/London"
+
+
+@patch("sc_foundation.sc_date_helper.SCCommon.get_geo_location")
+def test_dawn_dusk_times_sun_times_in_order(mock_geo):
+    """dawn < sunrise < noon < sunset < dusk."""  # noqa: D403
+    mock_geo.return_value = _SYDNEY_GEO
+
+    result = DateHelper.dawn_dusk_times(as_at=dt.date(2026, 8, 1))
+
+    assert result["dawn"] < result["sunrise"] < result["noon"] < result["sunset"] < result["dusk"]
+
+
+@patch("sc_foundation.sc_date_helper.SCCommon.get_geo_location")
+def test_dawn_dusk_times_result_times_are_timezone_aware(mock_geo):
+    """All datetime values in the result are timezone-aware."""
+    mock_geo.return_value = _SYDNEY_GEO
+
+    result = DateHelper.dawn_dusk_times(as_at=dt.date(2026, 8, 1))
+
+    for key in ("dawn", "sunrise", "noon", "sunset", "dusk"):
+        assert result[key].tzinfo is not None, f"{key} should be timezone-aware"
+
+
+@patch("sc_foundation.sc_date_helper.SCCommon.get_geo_location")
+def test_dawn_dusk_times_default_as_at_is_today(mock_geo):
+    """When as_at is omitted, as_date equals today in the location's timezone."""
+    mock_geo.return_value = _SYDNEY_GEO
+
+    result = DateHelper.dawn_dusk_times()
+
+    today_local = dt.datetime.now(tz=pytz.timezone("Australia/Sydney")).date()
+    assert result["as_date"] == today_local
 
 
 def test_today_add_days():

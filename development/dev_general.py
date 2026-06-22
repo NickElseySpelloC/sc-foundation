@@ -50,13 +50,24 @@ def test_select_folder_location():
     print(f"Located abs folder at: {SCCommon.select_folder_location('/Users/nick/tmp/123', create_folder=True)}")
 
 
-def test_get_dawn_dusk_times():
-    latitude = -33.86
-    longitude = 151.21
-    # timezone = "Australia/Sydney"
+def test_get_dawn_dusk_times(config: SCConfigManager):
+    location_config = config.get("Location", default={})
     as_date = dt.datetime(2026, 8, 1).date()  # noqa: DTZ001
-    return_data = DateHelper.get_dawn_dusk_times(latitude, longitude, timezone=None, as_at=as_date)
-    print(f"\n\ntest_get_dawn_dusk_times() return_data: {return_data}")
+    return_data = DateHelper.dawn_dusk_times(location_config=location_config, as_at=as_date)
+    print("\n\ntest_get_dawn_dusk_times():")
+    for key, value in return_data.items():
+        print(f"  {key}: {value}")
+
+
+def test_get_geolocation(config: SCConfigManager):
+    location_config = config.get("Location", default={})
+    geolocation = SCCommon.get_geo_location(location_config)
+    print(f"\n\ntest_get_geolocation() geolocation: {geolocation}")
+
+
+def test_get_external_ip():
+    external_ip = SCCommon.get_external_ip()
+    print(f"\n\ntest_get_external_ip() external_ip: {external_ip}")
 
 
 def main():
@@ -89,7 +100,9 @@ def main():
 
     # SCCommon tests
     # test_select_folder_location()
-    test_get_dawn_dusk_times()
+    test_get_geolocation(config)
+    test_get_external_ip()
+    test_get_dawn_dusk_times(config)
 
     # Test internet connection
     # if not SCCommon.check_internet_connection():
