@@ -2,7 +2,7 @@
 
 A Python utility library for log file management and YAML configuration file management. 
 
-Please see the [GitHub pages](https://nickelseyspelloc.github.io/sc-foundation/) for complete documentation.
+Please see the [GitHub pages](https://github.com/Spello-Consulting/sc-foundation) for complete documentation.
 
 ## Development Environment
 

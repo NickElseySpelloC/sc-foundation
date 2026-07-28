@@ -22,7 +22,7 @@ Or better yet, use UV:
     uv add sc-foundation-services
 
 ## Configuration File 
-The library uses a YAML file for configuration. An example config file (*config.yaml.example*) is [available on Github](https://github.com/NickElseySpelloC/sc-foundation). Copy this to *[your_app_name].yaml* before using the library. 
+The library uses a YAML file for configuration. An example config file (*config.yaml.example*) is [available on Github](https://github.com/Spello-Consulting/sc-foundation). Copy this to *[your_app_name].yaml* before using the library. 
 
 Here's the example file - the library expects to find the Files and Email sections in the file:
 

@@ -42,8 +42,8 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/NickElseySpelloC"
-Repository = "https://github.com/NickElseySpelloC/sc-foundation"
+Homepage = "https://github.com/Spello-Consulting/"
+Repository = "https://github.com/Spello-Consulting/sc-foundation"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
