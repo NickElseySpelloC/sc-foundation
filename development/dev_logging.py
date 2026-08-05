@@ -45,6 +45,16 @@ def log_fatal_error(logger: SCLogger):
     print("Logged fatal error without exiting the app.")
 
 
+def test_sms(logger: SCLogger):
+    # Test sending an SMS
+    message = "This is a test SMS from sc_foundation."
+
+    if logger.send_sms(message):
+        print("Test SMS sent successfully.")
+    else:
+        print("Test SMS failed to send.")
+
+
 def main():
     """Main function to run the example code."""
     print(f"Hello from sc-foundation running on {platform.system()}")
@@ -73,6 +83,9 @@ def main():
         print(f"Logger initialisation error: {e}", file=sys.stderr)
         return
     logger.log_message("This is a test message at the summary level.", "summary")
+
+    # Send a test SMS if Twilio is configured
+    test_sms(logger)
 
     # Setup email
     email_settings = config.get_email_settings()

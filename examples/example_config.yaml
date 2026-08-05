@@ -19,11 +19,16 @@ Files:
 
 
 # Enter your settings here if you want to be emailed when there's a critical error 
+# We recommend using environment variables for sensitive information like SMTP credentials, rather than storing them in the config file:
+# SMTP_ENABLE=
+# SMTP_SERVER=
+# SMTP_PORT=
+# SMTP_USERNAME=
+# SMTP_PASSWORD=
+# SMTP_SEND_TO_EMAIL=
+# SMTP_SUBJECT_PREFIX=
 Email:
   EnableEmail: True
-  SendEmailsTo: 
   SMTPServer: smtp.gmail.com
   SMTPPort: 587
-  SMTPUsername: 
-  SMTPPassword: 
   SubjectPrefix: 

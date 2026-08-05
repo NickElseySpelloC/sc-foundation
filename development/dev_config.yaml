@@ -7,7 +7,7 @@ AmberAPI:
   Timeout: 16
 
 Files:
-  LogfileName: development/logs/test_logfile.log
+  LogfileName: logs/dev_logfile.log
   LogfileMaxLines: 501
   TimestampFormat: "%Y-%m-%d %H:%M:%S.%f"
   LogProcessID: True
@@ -18,9 +18,6 @@ Files:
 # Enter your settings here if you want to be emailed when there's a critical error 
 Email:
   EnableEmail: True
-  SendEmailsTo: nick@elseyworld.com
-  SMTPServer: smtp.gmail.com
-  SMTPPort: 587
   SubjectPrefix: 
 
 HeartbeatMonitor:
@@ -28,7 +25,6 @@ HeartbeatMonitor:
   WebsiteURL: https://uptime.betterstack.com/api/v1/heartbeat/zcsNtnEQHRDNWJENvcZc94fx
   HeartbeatTimeout: 5
   Frequency: 20
-
 
 Location:
   Latitude: -33.86

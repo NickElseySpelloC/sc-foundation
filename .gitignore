@@ -4,7 +4,6 @@ __pycache__/
 .python-version
 .ruff_cache/
 .venv/
-.vscode/
 *.egg
 *.egg-info
 *.py[oc]
@@ -23,10 +22,9 @@ wheels/
 /*.txt
 /*.json
 /*.csv
-config.yaml
 logs/
-archive/
 src/*.json
 src/*.csv
 src/*.log
-logfile.log
+.env.target
+development/logs/

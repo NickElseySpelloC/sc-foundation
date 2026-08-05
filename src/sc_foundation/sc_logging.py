@@ -5,6 +5,7 @@ Provides general purpose logging functions.
 """
 import datetime as dt
 import inspect
+import os
 import smtplib
 import ssl
 import sys
@@ -16,6 +17,8 @@ from email.mime.text import MIMEText
 from pathlib import Path
 
 import requests
+from twilio.base.exceptions import TwilioException
+from twilio.rest import Client
 
 from sc_foundation.sc_common import SCCommon
 from sc_foundation.sc_date_helper import DateHelper
@@ -119,13 +122,6 @@ class SCLogger:
 
             # Truncate the log file if it exists
             self._initialise_monitoring_logfile()
-
-    def _initialise_monitoring_logfile(self) -> None:
-        """Initialise the monitoring log file. If it exists, truncate it to the max number of lines."""
-        if not self.file_logging_enabled:
-            return
-
-        self.trim_logfile()
 
     def trim_logfile(self) -> None:
         """Trims the log file to the maximum number of lines specified."""
@@ -261,8 +257,19 @@ class SCLogger:
 
         # First confirm that the body argument was passed as a string
         if not isinstance(body, str) and not isinstance(body, Path):
-            self.log_fatal_error("body argument must be a string containing the body content or a file path.")
+            self.log_fatal_error("body argument must be a string containing the body content or a file path.", report_stack=False, calling_function="send_email")
             return False
+
+        # See if we need to include a security warning in the email body and log files
+        security_warning = self.email_settings.get("SecurityWarning", False)
+        if security_warning:
+            warning_message = (
+                "WARNING: The configuration file for this application includes one of the following deprecated settings:\n"
+                "Email.SMTPUsername, Email.SMTPPassword, or Email.SendEmailsTo. These settings may contain sensitive information.\n"
+                "Consider moving these settings to environment variables for improved security. See the documentation for more information."
+            )
+            self.log_message(warning_message, "warning")
+            body = f"{body}\n\n{warning_message}"
 
         # See if the body string is something that looks like a file path
         try:
@@ -289,7 +296,7 @@ class SCLogger:
                 elif payload_path.suffix.lower() == ".txt":
                     payload_type = "plain"
                 else:
-                    self.log_fatal_error(f"Unsupported file type for email body: {payload_path.suffix}")
+                    self.log_fatal_error(f"Unsupported file type for email body: {payload_path.suffix}", report_stack=False, calling_function="send_email")
                     return False
             else:
                 payload_path = None
@@ -311,7 +318,7 @@ class SCLogger:
         smtp_password = self.email_settings.get("SMTPPassword")
 
         if not sender_email or not send_to or not smtp_server or not smtp_port or not smtp_password:
-            self.log_fatal_error("send_email(): Email settings are incomplete. 'SMTPUsername', 'SendEmailsTo', 'SMTPServer' and 'SMTPPassword' must be provided.")
+            self.log_fatal_error("send_email(): Email settings are incomplete. 'SMTPUsername', 'SendEmailsTo', 'SMTPServer' and 'SMTPPassword' must be provided.", report_stack=False, calling_function="send_email")
             return False
 
         try:
@@ -609,3 +616,119 @@ class SCLogger:
                 return True
             self.log_message(f"Heartbeat ping failed with status code: {response.status_code}", "error")
             return False
+
+    def sms_configured(self) -> bool:
+        """True when Twilio credentials and a sender ID are present and consistent.
+
+        Returns:
+            bool: True if Twilio credentials and a sender ID are present and consistent, False otherwise.
+        """
+        client, _ = self._build_twillo_client()
+        return client is not None and bool(os.environ.get("TWILIO_FROM_NUMBER"))
+
+    def send_sms(self, body: str, to_numbers: list[str] | None = None) -> bool:
+        """Send a SMS to one or more numbers using Twilio.
+
+        Two authentication styles are supported:
+
+        Account SID + Auth Token (simplest):
+            TWILIO_ACCOUNT_SID   = AC...           (your account SID)
+            TWILIO_AUTH_TOKEN    = <account auth token>
+
+        API Key (recommended by Twilio; revocable without changing the account):
+            TWILIO_ACCOUNT_SID   = AC...           (still your account SID)
+            TWILIO_API_KEY_SID   = SK...           (the API key SID)
+            TWILIO_API_KEY_SECRET= <api key secret>
+
+        In both cases the account SID must be the ``AC...`` value — an API key (``SK...``)
+        is not an account SID and cannot be used in its place.
+
+        In both cases, the sender ID must be set in the environment variable TWILIO_FROM_NUMBER.
+        This can be either an E.164 number (e.g., +15005550006) or an alphanumeric
+        sender ID (<= 11 chars, e.g., "SpelloWater").
+
+        If credentials are missing, sending is skipped with a warning (email alerts
+        still function). This keeps the app runnable before Twilio is configured.
+
+        Args:
+            body (str): The message body to send.
+            to_numbers (list[str] | None): A list of phone numbers in E.164 format to send the SMS to. If None, the list will be extracted from the TWILIO_SEND_SMS_TO environment variable (comma-separated). If no numbers are provided, the function will return False.
+
+        Returns:
+            bool: True if at least one message was accepted by Twilio. Returns False
+            (and logs a warning) if credentials are missing or every send fails.
+        """
+        if not to_numbers:
+            to_numbers = os.environ.get("TWILIO_SEND_SMS_TO", "").split(",")
+            if not to_numbers:
+                return False
+
+        from_id = os.environ.get("TWILIO_FROM_NUMBER")
+        if not from_id:
+            self.log_message("SMS not sent: TWILIO_FROM_NUMBER not configured.", "error")
+            return False
+
+        # Reject if the from_id is not a valid E.164 number or alphanumeric sender ID or more than 11 characters
+        if not (from_id.startswith("+") and from_id[1:].isdigit()) and not (from_id.isalnum() and len(from_id) <= 11):
+            self.log_message(
+                f"SMS not sent: TWILIO_FROM_NUMBER '{from_id}' is not a valid E.164 number or alphanumeric sender ID (<= 11 chars).", "error"
+            )
+            return False
+
+        client, error = self._build_twillo_client()
+        if client is None:
+            self.log_message(error, "error")  # pyright: ignore[reportArgumentType]
+            return False
+
+        any_sent = False
+        for number in to_numbers:
+            try:
+                client.messages.create(to=number, from_=from_id, body=body)
+                any_sent = True
+                self.log_message(f"SMS alert sent to {number}.", "summary")
+            except TwilioException as exc:
+                self.log_message(f"Failed to send SMS to {number}: {exc}", "error")
+        return any_sent
+
+    # =============== PRIVATE METHODS ============================================================
+
+    def _initialise_monitoring_logfile(self) -> None:
+        """Initialise the monitoring log file. If it exists, truncate it to the max number of lines."""
+        if not self.file_logging_enabled:
+            return
+
+        self.trim_logfile()
+
+    def _build_twillo_client(self) -> tuple[Client | None, str | None]:  # noqa: PLR6301
+        """Construct a Twilio client from env vars, or return (None, reason).
+
+        Returns:
+            tuple: A tuple containing the Twilio client (or None if not configured) and an error message (or None if the client was created successfully).
+        """
+        account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+        auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+        api_key_sid = os.environ.get("TWILIO_API_KEY_SID")
+        api_key_secret = os.environ.get("TWILIO_API_KEY_SECRET")
+
+        # API-key auth: SK sid + secret authenticate, but the AC account SID is still
+        # required for the resource path (/Accounts/{AccountSid}/Messages.json).
+        if api_key_sid and api_key_secret:
+            if not account_sid:
+                return None, (
+                    "SMS not sent: TWILIO_API_KEY_SID/SECRET are set but "
+                    "TWILIO_ACCOUNT_SID (the AC... account SID) is missing — "
+                    "API-key auth still needs the account SID."
+                )
+            return Client(api_key_sid, api_key_secret, account_sid), None
+
+        if account_sid and auth_token:
+            # Catch the common mistake of putting an API key (SK...) in the SID slot.
+            if account_sid.startswith("SK"):
+                return None, (
+                    "SMS not sent: TWILIO_ACCOUNT_SID looks like an API key (SK...). "
+                    "Set it to your account SID (AC...) and put the API key in "
+                    "TWILIO_API_KEY_SID / TWILIO_API_KEY_SECRET."
+                )
+            return Client(account_sid, auth_token), None
+
+        return None, "SMS not sent: Twilio credentials not configured in environment."

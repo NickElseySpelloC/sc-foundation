@@ -245,7 +245,10 @@ class SCConfigManager:
         return logger_settings
 
     def get_email_settings(self, config_section: str | None = "Email") -> dict | None:
-        """Returns the email settings from the config file.
+        """Returns the email settings from environment variables and/or the config file.
+
+        Environment variables take precedence over config file settings. If email is disabled or not configured correctly, this method will return None.
+        Warnings will be logged and included in the email body if the SMTPUsername, SMTPPassword, or SendEmailsTo settings are present in the config file.
 
         Args:
             config_section (Optional[str], optional): The section in the config file where email settings are stored.
@@ -254,26 +257,30 @@ class SCConfigManager:
             settings (dict): A dictionary of email settings or None if email is disabled or not configured correctly.
         """
         # fir check to see if we have an EnableEmail setting
-        enable_email = self.get(config_section, "EnableEmail", default=True)
-        if not enable_email:
+        enable_email = os.environ.get("SMTP_ENABLE")
+        if enable_email in {"0", "false", "False"}:
             return None
-        smtp_username = os.environ.get("SMTP_USERNAME")
-        if not smtp_username:
-            smtp_username = self.get(config_section, "SMTPUsername")
-        smtp_password = os.environ.get("SMTP_PASSWORD")
-        if not smtp_password:
-            smtp_password = self.get(config_section, "SMTPPassword")
 
+        if enable_email is None:    # Nothing in environment variables, check the config file
+            enable_email = self.get(config_section, "EnableEmail", default=True)
+            if not enable_email:
+                return None
         email_settings = {
-            "SendEmailsTo": self.get(config_section, "SendEmailsTo"),
-            "SMTPServer": self.get(config_section, "SMTPServer"),
-            "SMTPUsername": smtp_username,
-            "SMTPPassword": smtp_password,
-            "SubjectPrefix": self.get(config_section, "SubjectPrefix"),
+            "SMTPServer": os.environ.get("SMTP_SERVER") or self.get(config_section, "SMTPServer"),
+            "SMTPPort": os.environ.get("SMTP_PORT") or self.get(config_section, "SMTPPort", default=587),
+            "SMTPUsername": os.environ.get("SMTP_USERNAME") or self.get(config_section, "SMTPUsername"),
+            "SMTPPassword": os.environ.get("SMTP_PASSWORD") or self.get(config_section, "SMTPPassword"),
+            "SendEmailsTo": os.environ.get("SMTP_SEND_TO_EMAIL") or self.get(config_section, "SendEmailsTo"),
+            "SubjectPrefix": os.environ.get("SMTP_SUBJECT_PREFIX") or self.get(config_section, "SubjectPrefix"),
+            "SecurityWarning": False
         }
 
-        # Only return true if all the required email settings have been specified (excluding SubjectPrefix)
-        required_fields = {k: v for k, v in email_settings.items() if k != "SubjectPrefix"}
+        # If the Username, password or SendEmailTo settings are set in the config file, include a security warning
+        if self.get(config_section, "SMTPUsername") or self.get(config_section, "SMTPPassword") or self.get(config_section, "SendEmailsTo"):
+            email_settings["SecurityWarning"] = True
+
+        # Only return true if all the required email settings have been specified (excluding SubjectPrefix and SecurityWarning)
+        required_fields = {k: v for k, v in email_settings.items() if k not in {"SubjectPrefix", "SecurityWarning"}}
         if all(required_fields.values()):
             return email_settings
 
