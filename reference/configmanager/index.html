@@ -1250,7 +1250,9 @@
 
     <div class="doc doc-contents ">
 
-        <p>Returns the email settings from the config file.</p>
+        <p>Returns the email settings from environment variables and/or the config file.</p>
+<p>Environment variables take precedence over config file settings. If email is disabled or not configured correctly, this method will return None.
+Warnings will be logged and included in the email body if the SMTPUsername, SMTPPassword, or SendEmailsTo settings are present in the config file.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
