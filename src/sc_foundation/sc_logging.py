@@ -557,6 +557,8 @@ class SCLogger:
         if not isinstance(is_enabled, bool):
             msg = "Heartbeat config 'Enable' key must be a boolean."
             raise TypeError(msg)
+        if not is_enabled:
+            return  # Heartbeat monitor is disabled, so nothing to do
         if not isinstance(heartbeat_url, str):
             msg = "Heartbeat config 'WebsiteURL' key must be a string."
             raise TypeError(msg)
